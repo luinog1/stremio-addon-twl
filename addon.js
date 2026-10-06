@@ -702,12 +702,23 @@ function buildStreams(torrents, baseUrl) {
         if (t.size) info += info ? ` | ${t.size}` : `${t.size}`;
         info += info ? ` | ${t.seeds}` : `${t.seeds}`;
 
+        const displayName = info
+            ? `${quality} | ${info} | ${t.source || 'Unknown'}`
+            : `${quality} | ${t.source || 'Unknown'}`;
+        const displayDescription = t.title || 'Torrent stream';
+        const filename = t.title || undefined;
+
         streams.push({
             url: `${baseUrl}/stream/${t.hash}`,
-            title: `${quality} | ${info}\n${t.title} | ${t.source}`,
+            // Remux/Jellyfin consumes Stremio's name + description fields
+            // when presenting addon streams. Keep title too for older clients.
+            name: displayName,
+            title: displayDescription,
+            description: displayDescription,
             behaviorHints: {
                 bingeGroup: `render-proxy-${quality}`,
                 notWebReady: true,
+                ...(filename ? { filename } : {}),
             },
         });
     }
